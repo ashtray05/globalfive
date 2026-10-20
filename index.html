@@ -1,0 +1,1106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AEGIS-AQUA | GlobalFive</title>
+<meta name="description" content="AEGIS-AQUA by GlobalFive: an AI and digital-twin control system that helps floating data centres in Singapore use less energy, catch faults early and reuse waste heat.">
+<meta property="og:title" content="AEGIS-AQUA | GlobalFive">
+<meta property="og:description" content="A flight computer and digital twin for floating data centres in Singapore.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#0F3342">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<style>html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: avionics meets ship's plan. Deep-sea bands for the big moments, sea-glass paper for reading,
+   amber reserved for limits and cautions like a cockpit annunciator. The digital twin is the centrepiece. */
+:root{
+  --paper:#EAF0EF; --surface:#F7FAF9; --ink:#0D2633; --ink-soft:#4A626C; --line:#C6D4D4;
+  --band:#0F3342; --band-ink:#E6F0F0; --band-soft:#9DBBC2; --band-line:#24505F;
+  --teal:#0B7A80; --amber:#B56A00; --red:#B83A27; --base:#8CA0A6;
+  --sea-fill:#CFE2E3; --land:#D9E0DA; --hull:#DCE5E4; --twin-bg:#E3EEEE;
+  --display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+  --body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#07141B; --surface:#0D1F28; --ink:#E1EBEC; --ink-soft:#9AB0B6; --line:#21404B;
+  --band:#0A2A37; --band-ink:#E6F0F0; --band-soft:#8FB0B8; --band-line:#1F4D5D;
+  --teal:#3CC3C6; --amber:#F2A43A; --red:#F06B53; --base:#5F7E88;
+  --sea-fill:#0C2E3B; --land:#16282C; --hull:#173440; --twin-bg:#061A22;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#07141B; --surface:#0D1F28; --ink:#E1EBEC; --ink-soft:#9AB0B6; --line:#21404B;
+  --band:#0A2A37; --band-ink:#E6F0F0; --band-soft:#8FB0B8; --band-line:#1F4D5D;
+  --teal:#3CC3C6; --amber:#F2A43A; --red:#F06B53; --base:#5F7E88;
+  --sea-fill:#0C2E3B; --land:#16282C; --hull:#173440; --twin-bg:#061A22;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:64px;-webkit-text-size-adjust:100%}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--band)}
+a{color:var(--teal);text-underline-offset:3px}
+button{touch-action:manipulation}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--amber);outline-offset:3px;border-radius:4px}
+h1,h2,h3{font-family:var(--display);line-height:1.02;letter-spacing:.01em;text-wrap:balance;margin:0}
+h2{font-size:clamp(2.1rem,5vw,3.6rem);font-weight:800;text-transform:uppercase}
+h3{font-size:1.45rem;font-weight:800;text-transform:uppercase;letter-spacing:.02em}
+p{margin:0;max-width:65ch}
+.wrap{max-width:1140px;margin:0 auto;padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px))}
+.eyebrow{font-family:var(--mono);font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);display:flex;gap:.6em;align-items:center;flex-wrap:wrap}
+.eyebrow b{color:var(--amber);font-weight:600}
+.lede{font-size:1.18rem;color:var(--ink-soft)}
+section{padding-block:clamp(52px,9vw,104px)}
+.sec-head{display:grid;gap:14px;margin-bottom:36px}
+.src{font-family:var(--mono);font-size:.68rem;letter-spacing:.03em;color:var(--ink-soft)}
+
+/* NAV */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--band);color:var(--band-ink);border-bottom:1px solid var(--band-line)}
+.nav .wrap{display:flex;align-items:center;gap:16px;height:56px}
+.brand{font-family:var(--display);font-weight:800;font-size:1.35rem;letter-spacing:.04em;color:var(--band-ink);text-decoration:none;white-space:nowrap}
+.brand span{color:var(--amber)}
+.nav ul{list-style:none;margin:0 0 0 auto;padding:0;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;mask-image:linear-gradient(90deg,#000 85%,transparent)}
+.nav ul::-webkit-scrollbar{display:none}
+.nav a.l{display:block;padding:10px 10px;font-family:var(--mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--band-soft);text-decoration:none;white-space:nowrap;border-radius:4px}
+.nav a.l:hover{color:var(--band-ink);background:var(--band-line)}
+
+/* HERO */
+.hero{background:var(--band);color:var(--band-ink);position:relative;overflow:hidden;padding-block:clamp(40px,8vw,96px) 0}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:44px;align-items:end}
+.hero .eyebrow{color:var(--band-soft)}
+.hero h1{font-size:clamp(3.6rem,13vw,10.5rem);font-weight:800;line-height:.86;margin:18px 0 20px}
+.hero h1 .dash{color:var(--amber)}
+.hero .thesis{font-family:var(--display);font-weight:600;font-size:clamp(1.5rem,3.2vw,2.4rem);line-height:1.1;text-transform:uppercase;max-width:24ch}
+.hero .sub{color:var(--band-soft);margin-top:16px;font-size:1.1rem}
+.hero-cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:var(--mono);font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;padding:13px 18px;border-radius:4px;text-decoration:none;border:1px solid var(--band-line);color:var(--band-ink);background:transparent;cursor:pointer}
+.btn.primary{background:var(--amber);border-color:var(--amber);color:#1A1204}
+.btn:hover{filter:brightness(1.08)}
+.facts{border:1px solid var(--band-line);border-radius:6px;background:rgba(0,0,0,.18);display:grid}
+.fact{padding:16px 18px;border-bottom:1px solid var(--band-line);display:grid;grid-template-columns:6.2rem 1fr;gap:14px;align-items:center}
+.fact:last-child{border-bottom:0}
+.fact .v{font-family:var(--display);font-weight:800;font-size:2.3rem;line-height:1;color:var(--amber);font-variant-numeric:tabular-nums}
+.fact p{font-size:.95rem;color:var(--band-ink);line-height:1.4}
+.fact p span{display:block;font-family:var(--mono);font-size:.64rem;color:var(--band-soft);margin-top:3px;letter-spacing:.03em}
+#waves{display:block;width:100%;height:100px;margin-top:36px}
+
+/* PROBLEM */
+.big4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px;margin-bottom:52px}
+.b4{display:grid;gap:10px;align-content:start;border-top:3px solid var(--ink);padding-top:16px}
+.b4 .n{font-family:var(--display);font-weight:800;font-size:clamp(3rem,5.4vw,4.4rem);line-height:.9;font-variant-numeric:tabular-nums}
+.b4 .n.amber{color:var(--amber)}
+.b4 h3{font-size:1.15rem}
+.b4 p{font-size:.95rem;color:var(--ink-soft)}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:44px;align-items:start}
+.probs{display:grid;gap:22px}
+.prob{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start}
+.prob .tag{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;color:var(--amber);border:1px solid var(--amber);border-radius:3px;padding:3px 7px;margin-top:5px;white-space:nowrap}
+.prob h3{font-size:1.25rem;margin-bottom:4px}
+.prob p{color:var(--ink-soft);font-size:1rem}
+.pue{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px;margin:0}
+.pue h3{font-size:1.2rem;margin-bottom:6px}
+.pue .cap{font-size:.92rem;color:var(--ink-soft);margin-bottom:14px}
+.bar-row{display:grid;grid-template-columns:minmax(0,10rem) minmax(0,1fr) 3.4rem;gap:10px;align-items:center;padding:6px 0;font-size:.9rem}
+.bar-row .lbl{color:var(--ink-soft);line-height:1.25}
+.bar-track{position:relative;height:16px;background:var(--paper);border-radius:2px}
+.bar-fill{position:absolute;inset:0 auto 0 0;background:var(--base);border-radius:2px}
+.bar-row.hl .bar-fill{background:var(--teal)}
+.bar-row.target .bar-fill{background:transparent;border:2px dashed var(--amber)}
+.bar-row .val{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;font-size:.85rem}
+.pue .foot{font-size:.8rem;color:var(--ink-soft);margin-top:14px}
+
+/* IDEA */
+.parts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.part{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px;display:grid;gap:10px;align-content:start}
+.part.core{background:var(--band);color:var(--band-ink);border-color:var(--band)}
+.part.core p,.part.core .plain{color:var(--band-soft)}
+.part .code{font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;color:var(--teal)}
+.part.core .code{color:var(--amber)}
+.part p{color:var(--ink-soft);font-size:.96rem}
+.part .plain{font-size:.88rem;font-style:italic;border-left:2px solid var(--amber);padding-left:10px}
+.extra{margin-top:20px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.extra > div{border-top:2px solid var(--ink);padding-top:16px;display:grid;gap:8px}
+.extra p{color:var(--ink-soft);font-size:.98rem}
+
+/* TWIN */
+.twin-sec{background:var(--band);color:var(--band-ink)}
+.twin-sec .eyebrow,.twin-sec .lede{color:var(--band-soft)}
+.console{background:var(--surface);color:var(--ink);border-radius:8px;overflow:hidden;border:1px solid var(--band-line)}
+.cbar{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line);background:var(--paper)}
+.seg{display:inline-flex;border:1px solid var(--ink);border-radius:5px;overflow:hidden}
+.seg button{font-family:var(--mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;padding:10px 12px;border:0;background:transparent;color:var(--ink);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+.toggles{display:flex;flex-wrap:wrap;gap:8px}
+.tg{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:.72rem;padding:9px 11px;border:1px solid var(--line);border-radius:4px;background:var(--surface);cursor:pointer;user-select:none}
+.tg input{accent-color:var(--amber);margin:0;width:16px;height:16px}
+.tg:has(input:checked){border-color:var(--amber)}
+.canvas-box{position:relative}
+#twin{display:block;width:100%;aspect-ratio:2/1;height:auto;touch-action:pan-y}
+.hud{position:absolute;top:10px;right:12px;display:flex;gap:8px;align-items:center;pointer-events:none}
+.clock{font-family:var(--display);font-weight:800;font-size:2rem;line-height:1;font-variant-numeric:tabular-nums;color:var(--ink)}
+.mode{font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;padding:4px 8px;border-radius:3px;border:1px solid var(--teal);color:var(--teal);background:var(--surface)}
+.mode.caution{border-color:var(--amber);color:var(--amber)}
+.mode.warning{border-color:var(--red);color:var(--red)}
+.timeline{display:flex;align-items:center;gap:12px;padding:12px 14px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.timeline input{flex:1;accent-color:var(--amber);min-width:0;height:28px}
+.playbtn{font-family:var(--mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;padding:10px 12px;border-radius:4px;border:1px solid var(--ink);background:var(--ink);color:var(--surface);cursor:pointer;white-space:nowrap}
+.timeline .tl{font-family:var(--mono);font-size:.7rem;color:var(--ink-soft);white-space:nowrap}
+.lower{display:grid;grid-template-columns:260px minmax(0,1fr)}
+.steps{list-style:none;margin:0;padding:12px;display:grid;gap:6px;border-right:1px solid var(--line);align-content:start}
+.steps button{width:100%;display:grid;grid-template-columns:2rem 1fr;gap:8px;align-items:center;text-align:left;padding:10px;border-radius:5px;border:1px solid transparent;background:transparent;color:var(--ink);cursor:pointer;font-family:var(--body);font-size:.98rem}
+.steps button .k{font-family:var(--mono);font-size:.78rem;color:var(--ink-soft);border:1px solid var(--line);border-radius:50%;width:1.9rem;height:1.9rem;display:grid;place-items:center}
+.steps button b{display:block;font-family:var(--display);font-size:1.15rem;text-transform:uppercase;letter-spacing:.02em}
+.steps button small{display:block;color:var(--ink-soft);font-size:.8rem;line-height:1.3}
+.steps button[aria-current="step"]{border-color:var(--amber);background:color-mix(in srgb,var(--amber) 9%,transparent)}
+.steps button[aria-current="step"] .k{background:var(--amber);border-color:var(--amber);color:#1A1204}
+.steps .tour{display:block;text-align:center;margin-top:4px;font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:10px;border-radius:4px;border:1px dashed var(--ink-soft)}
+.panel{padding:20px 22px;display:grid;gap:14px;align-content:start;min-width:0}
+.panel h3{font-size:1.5rem}
+.panel > p{color:var(--ink-soft)}
+.readouts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.ro{background:var(--surface);padding:9px 11px;min-width:0}
+.ro .k{font-family:var(--mono);font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+.ro .v{font-family:var(--mono);font-size:1.05rem;font-weight:600;font-variant-numeric:tabular-nums}
+.ro .v.warn{color:var(--amber)} .ro .v.bad{color:var(--red)} .ro .v.ok{color:var(--teal)}
+.cand{display:grid;gap:8px}
+.opt{display:grid;grid-template-columns:minmax(0,1.3fr) repeat(3,minmax(0,1fr)) auto;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:4px;font-size:.92rem;font-variant-numeric:tabular-nums}
+.opt.pick{border-color:var(--teal);background:color-mix(in srgb,var(--teal) 9%,transparent)}
+.opt .nm{font-weight:700}
+.opt .c small{display:block;font-family:var(--mono);font-size:.6rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
+.verdict{font-family:var(--mono);font-size:.66rem;letter-spacing:.05em;padding:3px 7px;border-radius:3px;border:1px solid currentColor;white-space:nowrap;justify-self:end}
+.verdict.ok{color:var(--teal)} .verdict.warn{color:var(--amber)} .verdict.bad{color:var(--red)} .verdict.base{color:var(--ink-soft)}
+.tryit{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:12px;border:1px dashed var(--line);border-radius:4px}
+.tryit label{display:grid;gap:6px;font-family:var(--mono);font-size:.72rem;color:var(--ink-soft)}
+.tryit input{accent-color:var(--amber);width:100%;height:28px}
+.checks{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.checks li{display:grid;grid-template-columns:1.6rem 1fr;gap:10px;align-items:start;padding:10px 12px;border:1px solid var(--line);border-radius:4px;font-size:.96rem}
+.checks .m{font-family:var(--mono);font-weight:700}
+.checks .m.ok{color:var(--teal)} .checks .m.warn{color:var(--amber)} .checks .m.bad{color:var(--red)}
+.checks small{display:block;color:var(--ink-soft);font-size:.84rem}
+.callnote{font-size:.9rem;color:var(--ink-soft);background:var(--paper);border-radius:4px;padding:10px 12px}
+.twin-why{margin-top:28px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.twin-why div{border-top:2px solid var(--amber);padding-top:14px;display:grid;gap:6px}
+.twin-why p{color:var(--band-soft);font-size:.95rem}
+
+/* RESULTS */
+.charts-card{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.charts{padding:16px;display:grid;gap:10px}
+.chart-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px 10px;flex-wrap:wrap}
+.chart-h b{font-family:var(--mono);font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;font-weight:500;color:var(--ink-soft)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 12px;font-family:var(--mono);font-size:.68rem;color:var(--ink-soft)}
+.legend i{display:inline-block;width:16px;height:3px;vertical-align:middle;margin-right:5px;border-radius:2px}
+canvas.ch{width:100%;height:180px;display:block;cursor:crosshair}
+.results{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--line)}
+.res{padding:18px;border-right:1px solid var(--line);display:grid;gap:6px;align-content:start;min-width:0}
+.res:last-child{border-right:0}
+.res .k{font-family:var(--mono);font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+.res .v{font-family:var(--display);font-weight:800;font-size:2.3rem;line-height:1;font-variant-numeric:tabular-nums}
+.res .v.good{color:var(--teal)} .res .v.bad{color:var(--red)}
+.res .d{font-size:.88rem;color:var(--ink-soft)}
+.log{border-top:1px solid var(--line);padding:14px 16px;display:grid;gap:8px;font-family:var(--mono);font-size:.8rem}
+.log .row{display:grid;grid-template-columns:3.2rem 1fr;gap:10px}
+.log .t{color:var(--ink-soft)}
+.log .c{color:var(--amber)} .log .w{color:var(--red)} .log .i{color:var(--ink-soft)}
+.disclaim{font-size:.88rem;color:var(--ink-soft);margin-top:16px;max-width:none}
+details.model{margin-top:12px;font-size:.9rem;color:var(--ink-soft)}
+details.model summary{cursor:pointer;font-family:var(--mono);font-size:.76rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);padding:8px 0}
+details.model ul{margin:8px 0 0;padding-left:1.1em;display:grid;gap:4px}
+
+/* IMPACT */
+.impact{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:clamp(16px,3vw,32px)}
+.chain{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:stretch}
+.link{padding:16px 18px;border:1px solid var(--line);margin-left:-1px;display:grid;gap:6px;align-content:start;position:relative;background:var(--surface)}
+.link:first-child{margin-left:0;border-radius:6px 0 0 6px}
+.link:last-child{border-radius:0 6px 6px 0}
+.link .n{font-family:var(--display);font-weight:800;font-size:2.2rem;line-height:1;font-variant-numeric:tabular-nums}
+.link p{font-size:.9rem;color:var(--ink-soft)}
+.link.you{border-color:var(--amber);z-index:1;background:color-mix(in srgb,var(--amber) 7%,var(--surface))}
+.link.you .n{color:var(--amber)}
+.link input{width:100%;accent-color:var(--amber);height:30px}
+.link + .link::before{content:"×";position:absolute;left:-11px;top:18px;width:20px;height:20px;border-radius:50%;background:var(--ink);color:var(--surface);font-family:var(--mono);font-size:.8rem;display:grid;place-items:center;z-index:2}
+.equals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:28px}
+.eq{display:grid;gap:6px;border-top:3px solid var(--teal);padding-top:14px}
+.eq .n{font-family:var(--display);font-weight:800;font-size:clamp(2.6rem,5vw,3.8rem);line-height:.95;color:var(--teal);font-variant-numeric:tabular-nums}
+.eq small{color:var(--ink-soft);font-size:.82rem}
+.impact .note{margin-top:22px;font-size:.86rem;color:var(--ink-soft);max-width:none}
+.keppel{margin-top:26px;display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center;padding:18px 20px;background:var(--band);color:var(--band-ink);border-radius:6px}
+.keppel .n{font-family:var(--display);font-weight:800;font-size:3rem;line-height:1;color:var(--amber);white-space:nowrap}
+.keppel p{color:var(--band-soft)} .keppel b{color:var(--band-ink)}
+
+/* SEA etc */
+.sea-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-bottom:30px}
+.mit{border-top:2px solid var(--teal);padding-top:16px;display:grid;gap:8px;align-content:start}
+.mit p{color:var(--ink-soft);font-size:.97rem}
+.callout{background:var(--band);color:var(--band-ink);border-radius:8px;padding:28px;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:32px}
+.callout p{color:var(--band-soft)}
+.callout h3{margin-bottom:10px}
+.reg{display:grid;gap:14px}
+.reg div{border-left:2px solid var(--amber);padding-left:14px}
+.reg b{display:block;font-family:var(--mono);font-size:.78rem;letter-spacing:.06em;color:var(--band-ink)}
+.reg span{font-size:.92rem;color:var(--band-soft)}
+.reg a{color:var(--amber)}
+.builds{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:44px}
+.blist{display:grid;border-top:1px solid var(--line)}
+.blist div{display:grid;grid-template-columns:minmax(0,9.5rem) 1fr;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)}
+.blist b{font-family:var(--mono);font-size:.82rem;font-weight:600}
+.blist span{color:var(--ink-soft);font-size:.95rem}
+.new{background:var(--surface);border:2px solid var(--ink);border-radius:6px;padding:24px;display:grid;gap:14px;align-content:start}
+.new ol{margin:0;padding-left:1.2em;display:grid;gap:10px}
+.new li b{display:block}
+.new li span{color:var(--ink-soft);font-size:.95rem}
+.risks{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;margin-top:48px}
+.risk{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px;display:grid;gap:6px;align-content:start}
+.risk b{font-family:var(--display);font-size:1.15rem;text-transform:uppercase}
+.risk span{font-size:.88rem;color:var(--ink-soft)}
+.risk em{font-style:normal;font-size:.88rem;border-top:1px solid var(--line);padding-top:6px}
+.evals{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+.ev{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px;display:grid;gap:6px;align-content:start}
+.ev h3{font-size:1.15rem}
+.ev p{font-size:.9rem;color:var(--ink-soft)}
+.ev .m{font-family:var(--mono);font-size:.72rem;color:var(--teal)}
+.targets{margin-top:32px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:36px;align-items:start}
+.targets ul{margin:0;padding:0;list-style:none;border-top:1px solid var(--line)}
+.targets li{padding:12px 0 12px 30px;border-bottom:1px solid var(--line);position:relative;font-size:.98rem}
+.targets li::before{content:"";position:absolute;left:4px;top:18px;width:12px;height:12px;border:2px solid var(--amber);border-radius:2px}
+.road{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));counter-reset:r}
+.road li{padding:0 20px 0 0;display:grid;gap:10px;align-content:start;counter-increment:r}
+.road .ph{font-family:var(--mono);font-size:.74rem;letter-spacing:.1em;color:var(--amber);padding-bottom:12px;border-bottom:2px solid var(--line)}
+.road li:first-child .ph{border-bottom-color:var(--amber)}
+.road .ph::before{content:"PHASE " counter(r) " · "}
+.road p{font-size:.95rem;color:var(--ink-soft)}
+.team{background:var(--band);color:var(--band-ink)}
+.team .eyebrow{color:var(--band-soft)}
+.team-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:44px;align-items:end}
+.team h2{font-size:clamp(3rem,9vw,7rem)}
+.team h2 span{color:var(--amber)}
+.team p{color:var(--band-soft)}
+.pitch{border:1px solid var(--band-line);border-radius:6px;padding:22px;display:grid;gap:10px}
+.pitch .k{font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;color:var(--amber)}
+.pitch blockquote{margin:0;font-family:var(--display);font-weight:600;font-size:1.55rem;line-height:1.15;text-transform:uppercase;color:var(--band-ink)}
+.sources{padding-block:44px 60px}
+.sources ol{margin:12px 0 0;padding-left:1.3em;columns:2;column-gap:40px;font-size:.86rem;color:var(--ink-soft)}
+.sources li{break-inside:avoid;margin-bottom:8px;overflow-wrap:anywhere}
+
+@media (max-width:980px){
+  .hero-grid,.two,.callout,.builds,.targets,.team-grid{grid-template-columns:1fr}
+  .big4,.parts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .sea-grid,.twin-why{grid-template-columns:1fr}
+  .evals,.risks{grid-template-columns:1fr 1fr}
+  .road{grid-template-columns:1fr 1fr;row-gap:28px}
+  .lower{grid-template-columns:1fr}
+  .steps{border-right:0;border-bottom:1px solid var(--line);grid-template-columns:repeat(5,minmax(0,1fr))}
+  .steps li:last-child{grid-column:1/-1}
+  .steps button{grid-template-columns:1fr;justify-items:center;text-align:center;gap:4px;padding:8px 4px}
+  .steps button small{display:none}
+  .steps button b{font-size:1rem}
+  .readouts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .results{grid-template-columns:1fr 1fr}
+  .res{border-bottom:1px solid var(--line)}
+  .res:nth-child(2n){border-right:0}
+  .chain{grid-template-columns:1fr 1fr;gap:12px}
+  .link{margin-left:0;border-radius:6px!important}
+  .link + .link::before{display:none}
+  .sources ol{columns:1}
+}
+@media (max-width:640px){
+  body{font-size:16px}
+  .lede{font-size:1.06rem}
+  .big4,.parts,.evals,.road,.extra,.equals,.chain,.risks{grid-template-columns:1fr}
+  .big4{gap:28px}
+  .blist div{grid-template-columns:1fr;gap:4px}
+  .bar-row{grid-template-columns:minmax(0,7.2rem) minmax(0,1fr) 3rem;font-size:.84rem}
+  .tryit{grid-template-columns:1fr}
+  .keppel{grid-template-columns:1fr;gap:8px}
+  .fact{grid-template-columns:4.8rem 1fr;padding:14px}
+  .fact .v{font-size:2rem}
+  .hero-cta .btn{flex:1 1 100%}
+  .callout{padding:20px}
+  .cbar{padding:10px}
+  .seg{width:100%}
+  .seg button{flex:1}
+  .toggles{width:100%}
+  .tg{flex:1 1 100%}
+  #twin{aspect-ratio:1.74/1}
+  .hud{top:6px;right:8px;gap:6px}
+  .clock{font-size:1.25rem}
+  .mode{font-size:.6rem;padding:2px 6px}
+  .timeline{padding:10px}
+  .timeline .tl{display:none}
+  .panel{padding:16px}
+  .panel h3{font-size:1.3rem}
+  .steps{padding:8px;gap:4px}
+  .steps button .k{width:1.7rem;height:1.7rem}
+  .steps button b{font-size:.8rem;letter-spacing:0}
+  .opt{grid-template-columns:1fr 1fr 1fr;row-gap:6px}
+  .opt .nm{grid-column:1/3}
+  .opt .verdict{grid-column:3;grid-row:1}
+  .results{grid-template-columns:1fr 1fr}
+  .res{padding:14px}
+  .res .v{font-size:1.9rem}
+  canvas.ch{height:160px}
+  .log{font-size:.74rem}
+  .eq .n{font-size:2.6rem}
+}
+</style>
+</head>
+<body>
+<nav class="nav" aria-label="Sections">
+  <div class="wrap">
+    <a class="brand" href="#top">AEGIS<span>-</span>AQUA</a>
+    <ul>
+      <li><a class="l" href="#problem">Problem</a></li>
+      <li><a class="l" href="#idea">Idea</a></li>
+      <li><a class="l" href="#twin-sec">Digital twin</a></li>
+      <li><a class="l" href="#results">Results</a></li>
+      <li><a class="l" href="#impact">Impact</a></li>
+      <li><a class="l" href="#sea">Marine life</a></li>
+      <li><a class="l" href="#plan">Plan</a></li>
+      <li><a class="l" href="#team">Team</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow"><b>GlobalFive</b> · Hackathon proposal · Singapore</div>
+        <h1>AEGIS<span class="dash">-</span>AQUA</h1>
+        <p class="thesis">AI that runs a floating data centre the way a flight computer helps fly a plane.</p>
+        <p class="sub">A live digital copy of the data centre lets our AI test every decision safely before it touches real equipment. It keeps servers cool with less electricity, spots failing parts early and reuses waste heat.</p>
+        <div class="hero-cta">
+          <a class="btn primary" href="#twin-sec">See the digital twin</a>
+          <a class="btn" href="#impact">What it could save</a>
+        </div>
+      </div>
+      <aside class="facts" aria-label="Key facts">
+        <div class="fact"><span class="v">~7%</span><p>of Singapore's electricity goes to data centres<span>Latest published share · IMDA</span></p></div>
+        <div class="fact"><span class="v">40%</span><p>of a tropical data centre's power can go to cooling alone<span>Upper estimate · IMDA, 2023</span></p></div>
+        <div class="fact"><span class="v">1 °C</span><p>warmer saves 2–5% of cooling energy, if done safely<span>IMDA Tropical DC Standard</span></p></div>
+      </aside>
+    </div>
+  </div>
+  <canvas id="waves" aria-hidden="true"></canvas>
+</header>
+
+<main>
+<section id="problem">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow"><b>01</b> The problem</div>
+      <h2>Singapore needs more computing power, but has no land and no spare clean energy</h2>
+      <p class="lede">Demand for AI keeps climbing. Every new data centre has to squeeze onto a small, hot, humid island with a grid that runs mostly on imported gas.</p>
+    </div>
+
+    <div class="big4">
+      <div class="b4"><span class="n">48,000</span><h3>Flats' worth of power</h3><p>At full load, Keppel's 25 MW floating data centre at Loyang would use as much electricity as about 48,000 four-room HDB flats.</p><span class="src">Keppel EIA 2025 · MSE 2024 household data</span></div>
+      <div class="b4"><span class="n amber">2 in 5</span><h3>Units spent on cooling</h3><p>In our climate, up to 40% of a data centre's electricity goes on keeping servers cool instead of on computing.</p><span class="src">IMDA, 2023</span></div>
+      <div class="b4"><span class="n amber">5%</span><h3>Clean, hour by hour</h3><p>Only 5% of the power used by Google's Singapore data centres was carbon-free when matched hour by hour. In Finland it is 98%.</p><span class="src">Google Environmental Report 2026</span></div>
+      <div class="b4"><span class="n">~4 yrs</span><h3>To plug in a new site</h3><p>The average wait for a grid connection for a new 50 MW data centre in Singapore. Making better use of the power we already have is faster.</p><span class="src">JLL Global DC Outlook 2026</span></div>
+    </div>
+
+    <div class="two">
+      <div class="probs">
+        <div class="prob"><span class="tag">ENERGY</span><div><h3>Cooling plays it too safe</h3><p>Most plants run at fixed, cautious settings all day. That wastes electricity at night and during quiet hours, when servers need far less cooling.</p></div></div>
+        <div class="prob"><span class="tag">LAND</span><div><h3>Nowhere left to build</h3><p>Floating data centres free up land, but saltwater, marine growth and boat-only access make them harder to run and maintain.</p></div></div>
+        <div class="prob"><span class="tag">HEAT</span><div><h3>Heat goes to waste</h3><p>Almost every watt a server uses ends up as heat. Most facilities just dump it, often into the sea.</p></div></div>
+        <p class="lede" style="font-size:1.02rem">With so little clean power available, Singapore can't buy its way out. <b style="color:var(--ink)">Using less energy is the fastest lever we have.</b></p>
+      </div>
+      <figure class="pue">
+        <h3>How much energy is wasted on overhead?</h3>
+        <p class="cap">For every 1 kWh a server uses, how many extra kWh go to cooling, power losses and lighting. Lower is better.</p>
+        <div role="list">
+          <div class="bar-row" role="listitem"><span class="lbl">Typical company server room</span><span class="bar-track"><span class="bar-fill" style="width:90%"></span></span><span class="val">+0.63</span></div>
+          <div class="bar-row target" role="listitem"><span class="lbl">Singapore's 10-year goal</span><span class="bar-track"><span class="bar-fill" style="width:42.9%"></span></span><span class="val">+0.30</span></div>
+          <div class="bar-row" role="listitem"><span class="lbl">Average cloud provider</span><span class="bar-track"><span class="bar-fill" style="width:35.7%"></span></span><span class="val">+0.25</span></div>
+          <div class="bar-row hl" role="listitem"><span class="lbl">Microsoft, 2025</span><span class="bar-track"><span class="bar-fill" style="width:24.3%"></span></span><span class="val">+0.17</span></div>
+          <div class="bar-row hl" role="listitem"><span class="lbl">AWS, 2025</span><span class="bar-track"><span class="bar-fill" style="width:20%"></span></span><span class="val">+0.14</span></div>
+          <div class="bar-row hl" role="listitem"><span class="lbl">Google, 2025</span><span class="bar-track"><span class="bar-fill" style="width:12.9%"></span></span><span class="val">+0.09</span></div>
+        </div>
+        <p class="foot">The leaders get there with smart software control. AEGIS-AQUA brings that to a floating data centre in the tropics. Based on reported PUE (power usage effectiveness): AWS 2025 (citing IDC), Microsoft 2026, Google 2026, IMDA.</p>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section id="idea" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow"><b>02</b> Our idea</div>
+      <h2>Four parts, one brain</h2>
+      <p class="lede">AEGIS-AQUA is a software layer for floating data centres like Keppel's at Loyang. At its centre is a digital twin: a live virtual copy of the facility that the AI uses to think ahead.</p>
+    </div>
+    <div class="parts">
+      <article class="part core">
+        <span class="code">CORE · DIGITAL TWIN</span>
+        <h3>A live virtual copy</h3>
+        <p>Every few seconds, sensor readings update a virtual model of the whole facility, from racks and pipes to pumps, the heat store and the surrounding seawater.</p>
+        <p class="plain">Like a flight simulator for the data centre: try it on the copy first, then do it for real.</p>
+      </article>
+      <article class="part">
+        <span class="code">PART A · COOLING</span>
+        <h3>Smart cooling</h3>
+        <p>The AI predicts how hot things will get, tests options on the twin and picks the setting that uses the least power while staying safely below the limit.</p>
+        <p class="plain">Eases off at night. Pre-cools before big AI jobs.</p>
+      </article>
+      <article class="part">
+        <span class="code">PART B · HEALTH</span>
+        <h3>Fault prediction</h3>
+        <p>Spots trouble before it causes a breakdown, such as a pump losing flow or a blocked filter. Cameras with computer vision watch for corrosion, marine growth, cracks and leaks.</p>
+        <p class="plain">Fix it on schedule, not in an emergency.</p>
+      </article>
+      <article class="part">
+        <span class="code">PART C · HEAT</span>
+        <h3>Heat reuse</h3>
+        <p>Server heat is captured into a separate loop to preheat water on board. The twin plans heat reuse together with cooling, so less heat goes into the sea.</p>
+        <p class="plain">An absorption chiller is an option we'll test, not a promise.</p>
+      </article>
+    </div>
+    <div class="extra">
+      <div><h3>Run from shore</h3><p>Operators monitor and adjust everything remotely. Crews go out only for servicing, which saves boat trips, cost and emissions.</p></div>
+      <div><h3>Ask it anything</h3><p>An engineering copilot answers plain-language questions like "why did you lower the pumps?" with sensor evidence. Humans approve every action.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="twin-sec" class="twin-sec">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow"><b>03</b> See how it works</div>
+      <h2>Inside the digital twin</h2>
+      <p class="lede">A working model of one 1 MW floating module over a full day. Tap through the five things the AI does every few minutes, or press play and watch the day unfold. Switch between the physical plant and its digital twin at any time.</p>
+    </div>
+
+    <div class="console">
+      <div class="cbar">
+        <div class="seg" role="group" aria-label="View">
+          <button type="button" id="vReal" aria-pressed="true">Physical plant</button>
+          <button type="button" id="vTwin" aria-pressed="false">Digital twin</button>
+        </div>
+        <div class="toggles" role="group" aria-label="Events to simulate">
+          <label class="tg"><input type="checkbox" id="optSpike" checked> Surprise AI job at 14:00</label>
+          <label class="tg"><input type="checkbox" id="optPump" checked> Pump wears out from 09:00</label>
+          <label class="tg"><input type="checkbox" id="optSensor"> Sensor breaks at 18:00</label>
+        </div>
+      </div>
+      <div class="canvas-box">
+        <canvas id="twin" role="img" aria-label="Animated cross-section of the floating data centre"></canvas>
+        <div class="hud"><span class="clock" id="clock">14:00</span><span class="mode" id="mode">NORMAL</span></div>
+      </div>
+      <div class="timeline">
+        <button class="playbtn" id="play" type="button">▶ Play day</button>
+        <input type="range" id="t" min="0" max="287" value="168" aria-label="Time of day">
+        <span class="tl">00:00 – 24:00</span>
+      </div>
+      <div class="lower">
+        <ol class="steps" aria-label="How the AI works">
+          <li><button type="button" data-step="1" aria-current="step"><span class="k">1</span><span><b>Sense</b><small>Read every sensor</small></span></button></li>
+          <li><button type="button" data-step="2"><span class="k">2</span><span><b>Mirror</b><small>Update the twin</small></span></button></li>
+          <li><button type="button" data-step="3"><span class="k">3</span><span><b>Test</b><small>Try options on the twin</small></span></button></li>
+          <li><button type="button" data-step="4"><span class="k">4</span><span><b>Check</b><small>Apply safety rules</small></span></button></li>
+          <li><button type="button" data-step="5"><span class="k">5</span><span><b>Act</b><small>Send it, then learn</small></span></button></li>
+          <li><button type="button" class="tour" id="tour">▶ Auto tour</button></li>
+        </ol>
+        <div class="panel" id="panel" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <div class="twin-why">
+      <div><h3>Safe to experiment</h3><p>The AI can try hundreds of settings on the twin in a fraction of a second. Bad ideas fail in the copy, never on real servers.</p></div>
+      <div><h3>Sees the invisible</h3><p>When real readings drift away from what the twin expects, something is changing, such as a worn pump. That gap is an early warning.</p></div>
+      <div><h3>Plans ahead</h3><p>Engineers can rehearse a heatwave, a new rack of GPUs or a pump failure on the twin before it happens.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="results">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow"><b>04</b> Results from the simulated day</div>
+      <h2>Same work, less energy, no overheating</h2>
+      <p class="lede">The grey line is a conventional plant with fixed settings. The teal line is AEGIS. Both run the same workload in the same seawater. Tap a chart to jump the twin to that moment. Faults switched on above show up here too.</p>
+    </div>
+    <div class="charts-card">
+      <div class="charts">
+        <div class="chart-h"><b>Hottest server rack · °C</b>
+          <span class="legend"><span><i style="background:var(--base)"></i>Conventional</span><span><i style="background:var(--teal)"></i>AEGIS</span><span id="lgNaive" hidden><i style="background:var(--red)"></i>AI with no safety rules</span><span><i style="background:var(--amber)"></i>Safe limit</span></span>
+        </div>
+        <canvas class="ch" id="chT" role="img" aria-label="Rack temperature over 24 hours"></canvas>
+        <div class="chart-h"><b>Electricity used for cooling · kW</b>
+          <span class="legend"><span><i style="background:var(--base)"></i>Conventional</span><span><i style="background:var(--teal)"></i>AEGIS</span></span>
+        </div>
+        <canvas class="ch" id="chP" role="img" aria-label="Cooling power over 24 hours"></canvas>
+      </div>
+      <div class="results">
+        <div class="res"><span class="k">Cooling electricity saved</span><span class="v good" id="mSave">–</span><span class="d" id="mSaveD">–</span></div>
+        <div class="res"><span class="k">That's the same as</span><span class="v" id="mFlats">–</span><span class="d">four-room HDB flats' electricity for a day</span></div>
+        <div class="res"><span class="k">CO₂ avoided</span><span class="v" id="mCo2">–</span><span class="d" id="mCo2D">–</span></div>
+        <div class="res"><span class="k">Time above safe limit</span><span class="v" id="mOver">–</span><span class="d" id="mOverD">–</span></div>
+      </div>
+      <div class="log" id="log" aria-label="Alert log"></div>
+    </div>
+    <p class="disclaim">This is a simplified model built to show how the controller behaves. Its numbers are illustrations, not measured results. For the hackathon we will rebuild it as a full digital twin based on published specifications and report whatever we actually find.</p>
+    <details class="model">
+      <summary>What the model includes</summary>
+      <ul>
+        <li>Server load follows a daily cycle, with a training job from 10:00 to 12:00 that the AI can see coming in the job queue. The 14:00 job is a surprise.</li>
+        <li>Rack temperature rises with load and falls with colder coolant or faster pumps, with about a 15-minute delay.</li>
+        <li>The chiller works more efficiently with warmer coolant and less efficiently with warmer seawater. Pump power rises with the cube of speed.</li>
+        <li>AEGIS looks 30 minutes ahead, keeps a 2 °C safety margin below the 32 °C limit and changes settings gradually.</li>
+        <li>The worn pump is flagged when its measured flow drops 10% below what the twin expects. The broken sensor is stuck at a false 23 °C, and AEGIS catches it because a second sensor disagrees by more than 2 °C.</li>
+        <li>Heat is reused only when coolant returns at 26 °C or warmer. CO₂ uses Singapore's 2024 grid emission factor of 0.402 kg per kWh (EMA). A four-room HDB flat uses 380.7 kWh a month (MSE, 2024).</li>
+      </ul>
+    </details>
+  </div>
+</section>
+
+<section id="impact" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow"><b>05</b> Impact at Singapore scale</div>
+      <h2>What if every data centre ran this way?</h2>
+      <p class="lede">A back-of-the-envelope estimate built only from published figures. Drag the slider to change how much cooling energy smarter control saves.</p>
+    </div>
+    <div class="impact">
+      <div class="chain">
+        <div class="link"><span class="n">60 TWh</span><p>Electricity Singapore generated in 2024</p><span class="src">EMA</span></div>
+        <div class="link"><span class="n">7%</span><p>Share used by data centres, the latest published figure</p><span class="src">IMDA</span></div>
+        <div class="link"><span class="n">40%</span><p>Share of a data centre's electricity used for cooling, upper estimate</p><span class="src">IMDA</span></div>
+        <div class="link you"><span class="n" id="pctOut">10%</span><p>Share of cooling energy saved by smarter control</p><input type="range" id="pct" min="5" max="25" step="1" value="10" aria-label="Cooling energy saved, percent"></div>
+      </div>
+      <div class="equals">
+        <div class="eq"><span class="n" id="iGwh">168</span><p><b>GWh of electricity saved a year</b></p><small>One GWh is a million kWh.</small></div>
+        <div class="eq"><span class="n" id="iFlats">36,800</span><p><b>Four-room HDB flats</b> powered for a whole year</p><small>At 380.7 kWh per flat per month (MSE, 2024).</small></div>
+        <div class="eq"><span class="n" id="iCo2">67,500</span><p><b>Tonnes of CO₂ avoided a year</b></p><small>At 0.402 kg CO₂ per kWh (EMA, 2024).</small></div>
+      </div>
+      <p class="note">Why start at 10%: IMDA's Tropical Data Centre Standard says each 1 °C warmer saves 2–5% of cooling energy. Raising rooms from the typical 22 °C to 26 °C, which the standard supports, implies 8–20%. Our simulated day saved more than 10%, but real facilities vary. The 7% share dates from before the 2019 moratorium and the 40% is an upper estimate, so read these results as an order of magnitude, not a forecast.</p>
+      <div class="keppel">
+        <span class="n" id="kGwh">~9 GWh</span>
+        <p id="kTxt"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="sea" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow"><b>06</b> Protecting marine life</div>
+      <h2>Warm water can't just be dumped</h2>
+      <p class="lede">Many floating data centres together could heat the nearby sea and harm marine life. AEGIS treats the discharge temperature limit as a rule it can never break, on top of standard engineering fixes.</p>
+    </div>
+    <div class="sea-grid">
+      <div class="mit"><h3>Deep-water intake</h3><p>Pipes draw colder water from deeper down, so less seawater has to be pumped to carry away the same heat.</p></div>
+      <div class="mit"><h3>Diffuser nozzles</h3><p>Warm water is spread out so it mixes quickly with the currents, which keeps the warm patch small.</p></div>
+      <div class="mit"><h3>Reuse before release</h3><p>Heat is reused on board first. At larger scale it could help desalination or LNG regasification instead of warming the sea.</p></div>
+    </div>
+    <div class="callout">
+      <div>
+        <h3>Our addition: the twin watches the sea too</h3>
+        <p>The digital twin forecasts discharge temperature and the size of the warm-water plume. The AI will never pick a setting that breaks the approved limit, so saving energy never costs the sea. Every hour is logged for regulators.</p>
+      </div>
+      <div class="reg">
+        <div><b>Environmental Impact Assessment</b><span>Required before deployment, with binding measures such as real-time chlorine tracking. Keppel published its EIA in 2025. <a href="https://www.ura.gov.sg/land-planning/planning-strategies/greenery-and-heritage/environmental-impact-assessment/" target="_blank" rel="noopener">URA</a></span></div>
+        <div><b>Environmental Protection and Management Act</b><span>Legal limits on the temperature, chemicals and chemical oxygen demand of water released to sea. <a href="https://sso.agc.gov.sg/act/epma1999" target="_blank" rel="noopener">NEA · EPMA</a></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="plan" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow"><b>07</b> Feasibility and plan</div>
+      <h2>Built from parts that already work</h2>
+    </div>
+    <div class="builds">
+      <div>
+        <h3 style="margin-bottom:14px">What we build on</h3>
+        <div class="blist">
+          <div><b>Keppel, Loyang</b><span>A 25 MW floating data centre with closed-loop seawater cooling. Construction started in early 2026 and completion is expected in 2028.</span></div>
+          <div><b>Phaidra</b><span>Commercial AI that already optimises data centre cooling, which shows AI cooling control works in practice.</span></div>
+          <div><b>Tropical DC Standard</b><span>IMDA's standard for running data centres warmer, safely, at 26 °C and above.</span></div>
+          <div><b>Tech giants</b><span>Google shifts AI workloads to help the grid, Microsoft reclaims unused power and AWS uses AI to watch its cooling equipment.</span></div>
+          <div><b>Standard hardware</b><span>Liquid cooling, chillers, sensors, building management systems, heat exchangers and marine-grade steel.</span></div>
+        </div>
+      </div>
+      <div class="new">
+        <h3>What's new</h3>
+        <p style="color:var(--ink-soft)">Floating data centres, AI cooling and digital twins each exist already. Nobody has combined them for a floating site in the tropics. We bring together:</p>
+        <ol>
+          <li><b>A twin that protects as well as predicts</b><span>Every AI decision is tested on the copy and checked against aviation-style safety rules first.</span></li>
+          <li><b>Faults spotted two ways</b><span>Sensor data plus cameras that watch for marine damage.</span></li>
+          <li><b>Cooling, heat reuse and the sea planned together</b><span>Heat reuse and seawater discharge limits are planned together with cooling instead of separately.</span></li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="risks" aria-label="Risks">
+      <div class="risk"><b>AI gets it wrong</b><span>Could overheat servers</span><em>Tested on the twin first, hard limits, sensor cross-checks, safe mode, human override</em></div>
+      <div class="risk"><b>Saltwater</b><span>Corrosion raises costs</span><em>Super duplex 2507 steel where it pays off, camera inspections</em></div>
+      <div class="risk"><b>Marine life</b><span>Warm or polluted discharge</span><em>Discharge limits built into the AI, EIA, continuous monitoring</em></div>
+      <div class="risk"><b>Savings eaten up</b><span>Pumps and AI use energy too</span><em>Count total system energy and reuse heat only for a net gain</em></div>
+      <div class="risk"><b>Upfront cost</b><span>Marine kit is expensive</span><em>Prove it in simulation, then a small pilot before scaling</em></div>
+    </div>
+
+    <div style="margin-top:52px">
+      <h3 style="margin-bottom:16px">How we'll judge success</h3>
+      <div class="evals">
+        <div class="ev"><h3>Feasibility</h3><p>Accurate and safe to run?</p><span class="m">Forecast error · % safe decisions</span></div>
+        <div class="ev"><h3>Impact</h3><p>Better than conventional?</p><span class="m">kWh saved · PUE · t CO₂e</span></div>
+        <div class="ev"><h3>Scalability</h3><p>Grows with more modules?</p><span class="m">Speed as assets grow · reuse</span></div>
+        <div class="ev"><h3>Innovation</h3><p>Do the parts beat each alone?</p><span class="m">Twin vs real error · fault recall</span></div>
+        <div class="ev"><h3>Sustainability</h3><p>Better over the full life?</p><span class="m">Life-cycle CO₂e · heat reused</span></div>
+      </div>
+      <div class="targets">
+        <div><h3>Hackathon targets</h3><p style="color:var(--ink-soft);margin-top:10px">For our simulation, not promised real-world results. We'll report real numbers even if we miss.</p></div>
+        <ul>
+          <li>Keep every simulated rack inside its safe temperature limit</li>
+          <li>Catch at least 90% of faults we deliberately inject</li>
+          <li>Measure cooling energy saved against a fixed-setting plant</li>
+          <li>Show the twin stays within 1 °C of the simulated real plant</li>
+          <li>Prove the system drops to safe mode when a sensor fails</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="margin-top:52px">
+      <h3 style="margin-bottom:16px">Roadmap</h3>
+      <ol class="road">
+        <li><span class="ph">HACKATHON</span><h3>Simulate</h3><p>Build the twin and controller. Compare them with a fixed-setting plant, inject faults and test safe mode.</p></li>
+        <li><span class="ph">CALIBRATE</span><h3>Match reality</h3><p>Tune the twin on Keppel's published design data. Train computer vision on corrosion and marine-growth images.</p></li>
+        <li><span class="ph">PILOT</span><h3>Advise</h3><p>Run on one module in advice-only mode, with operators approving each recommendation.</p></li>
+        <li><span class="ph">SCALE</span><h3>Control</h3><p>Automatic control within approved limits, heat reuse switched on and rollout to more modules.</p></li>
+      </ol>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+<section class="team" id="team">
+  <div class="wrap">
+    <div class="team-grid">
+      <div>
+        <div class="eyebrow"><b>08</b> Team</div>
+        <h2>Global<span>Five</span></h2>
+        <p style="margin-top:14px">Five polytechnic STEM students and Temasek Overseas Undergraduate Scholarship finalists, combining engineering, computing and applied science to tackle a problem Singapore will live with for decades.</p>
+      </div>
+      <div class="pitch">
+        <span class="k">ONE-LINE PITCH</span>
+        <blockquote>AEGIS-AQUA gives a floating data centre a digital twin and a flight computer, so Singapore can compute more while using less power.</blockquote>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="sources">
+  <div class="wrap">
+    <div class="eyebrow">Sources</div>
+    <ol>
+      <li><a href="https://www.imda.gov.sg/how-we-can-help/green-dc-roadmap" target="_blank" rel="noopener">IMDA, Green Data Centre Roadmap</a></li>
+      <li><a href="https://w.media/singapore-sets-sustainability-standard-for-data-centers-operating-in-tropical-climates/" target="_blank" rel="noopener">w.media, Singapore standard for tropical data centres</a> (cooling up to 40%, 2–5% per °C)</li>
+      <li><a href="https://www.datacentres.com/news/singapore-lifts-data-centre-moratorium" target="_blank" rel="noopener">Datacentres.com, data centres ~7% of Singapore's electricity</a></li>
+      <li><a href="https://ema.gov.sg/resources/singapore-energy-statistics/chapter2" target="_blank" rel="noopener">EMA, Singapore Energy Statistics</a> (60 TWh generated, 0.402 kg CO₂/kWh, 2024)</li>
+      <li><a href="https://www.mse.gov.sg/latest-news/written-reply-to-parliamentary-question-on--monthly-average-electricity-and-water-consumption-rates-for-households/" target="_blank" rel="noopener">MSE, household electricity consumption 2024</a></li>
+      <li><a href="https://w.media/singapores-floating-data-center-kicks-off-construction-in-q1-2026-completion-in-2028/" target="_blank" rel="noopener">w.media, Keppel floating data centre construction</a></li>
+      <li><a href="https://datacenterdynamics.com/en/news/singapore-to-unlock-300mw-of-data-center-capacity-through-industry-energy-efficiency-initiatives" target="_blank" rel="noopener">DCD, Singapore Green DC Roadmap targets</a></li>
+      <li>JLL, 2026 Global Data Center Outlook (grid connection lead times)</li>
+      <li>Google, 2026 Environmental Report (PUE 1.09, hourly CFE by grid)</li>
+      <li>Microsoft, 2026 Environmental Sustainability Report (PUE 1.17)</li>
+      <li>Amazon, 2025 Sustainability Report AWS Summary (PUE 1.14, IDC averages)</li>
+      <li><a href="https://sso.agc.gov.sg/act/epma1999" target="_blank" rel="noopener">Environmental Protection and Management Act 1999</a></li>
+    </ol>
+  </div>
+</div>
+</footer>
+
+<script>
+(function(){
+"use strict";
+const reduce = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+const el = id => document.getElementById(id);
+let C = {};
+function readColors(){
+  const cs = getComputedStyle(document.documentElement);
+  ['paper','surface','ink','ink-soft','line','band','band-line','band-soft','teal','amber','red','base','sea-fill','land','hull','twin-bg'].forEach(k => C[k] = cs.getPropertyValue('--'+k).trim());
+}
+readColors();
+function rgb(hex){ hex = hex.replace('#',''); if (hex.length===3) hex = hex.split('').map(c=>c+c).join(''); const n = parseInt(hex,16); return [n>>16&255, n>>8&255, n&255]; }
+function mix(a,b,t){ const A=rgb(a),B=rgb(b); return `rgb(${A.map((v,i)=>Math.round(v+(B[i]-v)*t)).join(',')})`; }
+function heat(T){ if (T<=26) return C.teal; if (T<=30) return mix(C.teal, C.amber, (T-26)/4); return mix(C.amber, C.red, Math.min(1,(T-30)/3)); }
+
+/* ---------- hero waves ---------- */
+const wv = el('waves'), wctx = wv.getContext('2d'); let wt = 0;
+function drawWaves(){
+  const dpr = window.devicePixelRatio||1, w = wv.clientWidth, h = wv.clientHeight; if(!w) return;
+  if (wv.width !== Math.round(w*dpr)) { wv.width = Math.round(w*dpr); wv.height = Math.round(h*dpr); }
+  wctx.setTransform(dpr,0,0,dpr,0,0); wctx.clearRect(0,0,w,h);
+  const cols = [C['band-line'], C['band-soft'], C.teal];
+  for (let k=0;k<3;k++){
+    wctx.beginPath();
+    for (let x=0;x<=w;x+=6){ const y = 26 + k*22 + Math.sin(x/(90+k*30) + wt*(0.6+k*0.25))*(8-k*1.5) + Math.sin(x/37 + wt*1.3 + k)*2; x? wctx.lineTo(x,y) : wctx.moveTo(x,y); }
+    wctx.strokeStyle = cols[k]; wctx.globalAlpha = .35 + k*.2; wctx.lineWidth = 1.5; wctx.stroke();
+  }
+  wctx.globalAlpha = 1;
+}
+
+/* ---------- simulation ---------- */
+const N=288, LIMIT=32, MARGIN=2, K=8, LAG=0.35, EF=0.402, FLAT_MONTH=380.7, FLAT_DAY=FLAT_MONTH*12/365;
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const hh = i => { const m=i*5; return String(Math.floor(m/60)%24).padStart(2,'0')+':'+String(m%60).padStart(2,'0'); };
+function scenario(o){
+  const r = mulberry32(20261020), s = {load:[],fc:[],sea:[],health:[],demand:[],nA:[],nB:[],nF:[]};
+  const g = (h,c,w) => Math.exp(-((h-c)**2)/(2*w*w));
+  for (let i=0;i<N;i++){
+    const h=i/12, base=0.52+0.28*(0.5-0.5*Math.cos(2*Math.PI*(h-4)/24));
+    const sched=(h>=10&&h<12)?0.10:0, uns=(o.spike&&h>=14&&h<14.75)?0.17:0, noise=(r()-0.5)*0.04;
+    s.fc.push(base+sched); s.load.push(Math.min(1,base+sched+uns+noise));
+    s.sea.push(29.4+0.7*Math.sin(2*Math.PI*(h-9)/24));
+    s.health.push(o.pump&&h>=9 ? Math.max(0.74,1-0.26*(h-9)/6) : 1);
+    s.demand.push(18+45*g(h,7.5,1.2)+40*g(h,19.5,1.5));
+    s.nA.push((r()-0.5)*0.3); s.nB.push((r()-0.5)*0.3); s.nF.push((r()-0.5)*0.02);
+  }
+  return s;
+}
+function plant(Ts,F,health,L,sea,rec){
+  const Fe=Math.max(0.2,F*health), teq=Ts+K*L/Fe, Tr=Ts+6*L/Fe, IT=1000*L;
+  const cop=3.2+0.22*(Ts-18)-0.12*(sea-29), chiller=Math.max(0,IT-rec)/cop, pump=70*F*F*F;
+  return {teq,Tr,total:chiller+pump+30};
+}
+function run(s,mode,o){
+  let Ts=18,F=0.9,Th=24,Thm=24,b=0,hEst=1,safe=false,low=0,dis=0,pumpAlert=false,env=false;
+  const out={Th:[],Thm:[],P:[],Ts:[],F:[],rec:[],mode:[],sA:[],sB:[],hEst:[],tested:[],alerts:[]};
+  for (let i=0;i<N;i++){
+    const L=s.load[i], sea=s.sea[i], hl=s.health[i];
+    let sA=Th+s.nA[i]; const sB=Th+s.nB[i];
+    if (o.sensor && i>=216) sA=23.0;
+    let tested=0;
+    if (mode==='baseline'){ Ts=18; F=0.9; }
+    else {
+      hEst=0.8*hEst+0.2*(hl+s.nF[i]);
+      if (mode==='aegis'){
+        if (hEst<0.9){ low++; if(low>=3&&!pumpAlert){pumpAlert=true; out.alerts.push({i,type:'pump'});} } else low=0;
+        if (Math.abs(sA-sB)>2){ dis++; if(dis>=2&&!safe){safe=true; out.alerts.push({i,type:'sensor'});} } else dis=0;
+      }
+      const Tm = mode==='aegis' ? (safe? sB : (sA+sB)/2) : sA;
+      b=0.8*b+0.2*(Tm-Thm);
+      if (safe){ Ts=18; F=0.9; }
+      else if (Tm>=LIMIT-0.5){ Ts=18; F=1; if(!env&&mode==='aegis'){env=true; out.alerts.push({i,type:'env'});} }
+      else {
+        if (Tm<LIMIT-1.5) env=false;
+        let Lp=L; for(let k=1;k<=6;k++) Lp=Math.max(Lp,s.fc[Math.min(i+k,N-1)]); Lp+=0.03;
+        let best=null,bc=Infinity;
+        for (let t2=Math.max(18,Ts-0.5); t2<=Math.min(27,Ts+0.5)+1e-9; t2+=0.5)
+          for (let f2=Math.max(0.4,F-0.1); f2<=Math.min(1,F+0.1)+1e-9; f2+=0.05){
+            tested++;
+            const pred=t2+K*Lp/Math.max(0.2,f2*hEst)+b; if(pred>LIMIT-MARGIN) continue;
+            const c=plant(t2,f2,hEst,Lp,sea,0).total; if(c<bc){bc=c; best=[t2,f2];}
+          }
+        if (best){ Ts=+best[0].toFixed(2); F=+best[1].toFixed(2); } else { Ts=Math.max(18,Ts-0.5); F=Math.min(1,F+0.1); }
+      }
+    }
+    const p0=plant(Ts,F,hl,L,sea,0), rec=p0.Tr>=26?Math.min(s.demand[i],0.12*1000*L):0, p=plant(Ts,F,hl,L,sea,rec);
+    Th+=LAG*(p.teq-Th); Thm+=LAG*((Ts+K*L/Math.max(0.2,F*hEst))-Thm);
+    out.Th.push(Th); out.Thm.push(Thm); out.P.push(p.total); out.Ts.push(Ts); out.F.push(F); out.rec.push(rec);
+    out.sA.push(sA); out.sB.push(sB); out.hEst.push(hEst); out.tested.push(tested);
+    out.mode.push(safe?'warning':(pumpAlert||env)?'caution':'normal');
+  }
+  return out;
+}
+
+let S,B,A,X,O, cur=168, view='real', step=1;
+const opts = () => ({spike:el('optSpike').checked, pump:el('optPump').checked, sensor:el('optSensor').checked});
+const sum = a => a.reduce((x,y)=>x+y,0);
+const fmt = n => Math.round(n).toLocaleString('en-SG');
+const r100 = n => (Math.round(n/100)*100).toLocaleString('en-SG');
+function simulate(){
+  O=opts(); S=scenario(O); B=run(S,'baseline',O); A=run(S,'aegis',O); X=O.sensor?run(S,'naive',O):null;
+  el('lgNaive').hidden=!X; summarise(); updateAll();
+}
+function summarise(){
+  const eB=sum(B.P)/12, eA=sum(A.P)/12, saved=eB-eA;
+  el('mSave').textContent=Math.round(saved/eB*100)+'%';
+  el('mSaveD').textContent=fmt(saved)+' kWh less in one day, from one 1 MW module';
+  el('mFlats').textContent=fmt(saved/FLAT_DAY);
+  el('mCo2').textContent=fmt(saved*EF)+' kg';
+  el('mCo2D').textContent='in one day, or about '+Math.round(saved*EF*365/1000)+' tonnes a year';
+  const over=A.Th.filter(v=>v>LIMIT).length*5;
+  el('mOver').textContent=over+' min'; el('mOver').className='v '+(over?'bad':'good');
+  el('mOverD').textContent = X ? 'for AEGIS. An AI with no safety rules: '+(X.Th.filter(v=>v>LIMIT).length*5)+' min, peaking at '+Math.max(...X.Th).toFixed(0)+' °C' : 'AEGIS peaked at '+Math.max(...A.Th).toFixed(1)+' °C, limit 32 °C';
+  const msgs={pump:['c','CAUTION','Pump P2 is moving 10% less water than the twin expects. Inspection booked before it fails.'],
+              sensor:['w','WARNING','Two rack sensors disagree. AEGIS switched to safe settings and alerted the operator.'],
+              env:['c','CAUTION','Close to the temperature limit. Full cooling applied.']};
+  const rows=[];
+  if (O.spike) rows.push({i:168,h:'<span class="i">EVENT</span> A surprise AI job hits the servers.'});
+  A.alerts.forEach(a=>{const m=msgs[a.type]; rows.push({i:a.i,h:`<span class="${m[0]}">${m[1]}</span> ${m[2]}`});});
+  if (O.pump) rows.push({i:287,h:'<span class="i">NOTE</span> The conventional plant never noticed the worn pump. Running cold all day hid the problem.'});
+  if (X) rows.push({i:287,h:`<span class="w">COMPARE</span> An AI with no safety rules trusted the broken sensor and let racks reach ${Math.max(...X.Th).toFixed(0)} °C.`});
+  rows.sort((p,q)=>p.i-q.i);
+  el('log').innerHTML = rows.length ? rows.map(r=>`<div class="row"><span class="t">${r.i===287?'24:00':hh(r.i)}</span><span>${r.h}</span></div>`).join('') : '<div class="row"><span class="t">—</span><span class="i">No alerts. Switch on a fault in the twin above to test the safety logic.</span></div>';
+}
+
+/* ---------- step panel ---------- */
+const v1 = (n,d=1) => n.toFixed(d);
+let trySet=24, tryPump=0.6;
+function panelHTML(){
+  const i=cur, L=S.load[i], sea=S.sea[i], th=A.Th[i], tm=A.Thm[i], md=A.mode[i];
+  const pumpSeen=A.alerts.some(a=>a.type==='pump'&&a.i<=i), sensSeen=A.alerts.some(a=>a.type==='sensor'&&a.i<=i);
+  const dA=Math.abs(A.sA[i]-A.sB[i]);
+  if (step===1) return `<h3>1 · Sense</h3><p>Dozens of sensors report every few seconds: how hot each rack is, how fast coolant flows, how warm the seawater is and how much power everything draws.</p>
+    <div class="readouts">
+      <div class="ro"><div class="k">Server load</div><div class="v">${fmt(L*1000)} kW</div></div>
+      <div class="ro"><div class="k">Seawater</div><div class="v">${v1(sea)} °C</div></div>
+      <div class="ro"><div class="k">Rack sensor A</div><div class="v ${dA>2?'bad':''}">${v1(A.sA[i])} °C</div></div>
+      <div class="ro"><div class="k">Rack sensor B</div><div class="v">${v1(A.sB[i])} °C</div></div>
+      <div class="ro"><div class="k">Pump flow</div><div class="v ${A.hEst[i]<0.9?'warn':''}">${Math.round(A.F[i]*S.health[i]*100)}%</div></div>
+      <div class="ro"><div class="k">Coolant out</div><div class="v">${v1(A.Ts[i])} °C</div></div>
+      <div class="ro"><div class="k">Heat reused</div><div class="v">${fmt(A.rec[i])} kW</div></div>
+      <div class="ro"><div class="k">Cooling power</div><div class="v">${fmt(A.P[i])} kW</div></div>
+    </div><p class="callnote">The amber dots on the drawing are sensors. Underwater cameras scan the hull for corrosion and marine growth.</p>`;
+  if (step===2) { const err=Math.abs(th-tm); return `<h3>2 · Mirror</h3><p>The readings update the digital twin, a virtual copy of the whole module. The twin is what lets the AI think ahead.</p>
+    <div class="readouts">
+      <div class="ro"><div class="k">Real hottest rack</div><div class="v">${v1(th)} °C</div></div>
+      <div class="ro"><div class="k">Twin's estimate</div><div class="v">${v1(tm)} °C</div></div>
+      <div class="ro"><div class="k">Difference</div><div class="v ${err>1?'warn':'ok'}">${v1(err,2)} °C</div></div>
+      <div class="ro"><div class="k">Pump health</div><div class="v ${A.hEst[i]<0.9?'warn':'ok'}">${Math.round(A.hEst[i]*100)}%</div></div>
+    </div><p class="callnote">${pumpSeen?'The twin noticed pump P2 delivering less water than it should. It now plans with a weaker pump and has booked an inspection.':'When the real plant stops matching the twin, something has changed. That is how worn parts get caught early.'}</p>`; }
+  if (step===3) return `<h3>3 · Test</h3><p>Before changing anything, the AI tries options on the twin for the next 30 minutes and predicts how hot the racks would get and how much power each option needs.${A.tested[i]?' This round it tested '+A.tested[i]+' settings.':''}</p>${candHTML()}
+    <div class="tryit"><label for="trySet">Your coolant temperature: <b id="trySetV">${v1(trySet)} °C</b><input type="range" id="trySet" min="18" max="27" step="0.5" value="${trySet}"></label>
+    <label for="tryPump">Your pump speed: <b id="tryPumpV">${Math.round(tryPump*100)}%</b><input type="range" id="tryPump" min="0.4" max="1" step="0.05" value="${tryPump}"></label></div>`;
+  if (step===4) { const pred=A.Ts[i]+K*L/Math.max(0.2,A.F[i]*A.hEst[i]);
+    return `<h3>4 · Check</h3><p>Borrowed from aviation: hard rules the AI can never overrule, no matter what it predicts.</p>
+    <ul class="checks">
+      <li><span class="m ${pred<=LIMIT-MARGIN+0.3?'ok':'warn'}">${pred<=LIMIT-MARGIN+0.3?'✓':'!'}</span><span>Predicted rack temperature ${v1(pred)} °C<small>Must stay under 30 °C, which is the 32 °C limit minus a 2 °C safety margin.</small></span></li>
+      <li><span class="m ${sensSeen?'bad':'ok'}">${sensSeen?'✕':'✓'}</span><span>${sensSeen?'Sensors disagree by '+v1(dA)+' °C':'Sensors agree, within '+v1(dA)+' °C'}<small>${sensSeen?'Readings can no longer be trusted, so the AI hands back to fixed safe settings.':'Two independent sensors cross-check each other, like an aircraft\'s instruments.'}</small></span></li>
+      <li><span class="m ${pumpSeen?'warn':'ok'}">${pumpSeen?'!':'✓'}</span><span>${pumpSeen?'Pump P2 worn, plan adjusted':'Equipment healthy'}<small>${pumpSeen?'The twin uses the pump\'s real, weaker flow when choosing settings.':'Flow, pressure and power match what the twin expects.'}</small></span></li>
+      <li><span class="m ok">✓</span><span>Seawater discharge within limit<small>Warm-water release stays under the approved temperature (simulated).</small></span></li>
+    </ul>`; }
+  const save=B.P[i]-A.P[i];
+  return `<h3>5 · Act &amp; learn</h3><p>${md==='warning'?'In safe mode the AI holds back. It keeps the plant on fixed, conservative settings until an engineer checks the faulty sensor.':'The winning setting goes to the real pumps and chiller, or to an operator for approval during a pilot. The AI then compares what happened with what the twin predicted and gets a little better.'}</p>
+    <div class="readouts">
+      <div class="ro"><div class="k">Coolant temp sent</div><div class="v">${v1(A.Ts[i])} °C</div></div>
+      <div class="ro"><div class="k">Pump speed sent</div><div class="v">${Math.round(A.F[i]*100)}%</div></div>
+      <div class="ro"><div class="k">Saving right now</div><div class="v ${save>0?'ok':''}">${fmt(Math.max(0,save))} kW</div></div>
+      <div class="ro"><div class="k">vs conventional</div><div class="v">${Math.round(Math.max(0,save)/B.P[i]*100)}% less</div></div>
+    </div><p class="callnote">Then it starts again from step 1, every five minutes, day and night.</p>`;
+}
+function candHTML(){
+  const i=cur, L=Math.max(S.load[i], ...S.fc.slice(i+1,i+7)), sea=S.sea[i], h=A.hEst[i];
+  const rows=[
+    {n:'Conventional', t:18, f:0.9, base:true},
+    {n:'AEGIS choice', t:A.Ts[i], f:A.F[i], pick:true},
+    {n:'Too aggressive', t:27, f:0.45},
+    {n:'Your setting', t:trySet, f:tryPump}
+  ];
+  return '<div class="cand">'+rows.map(r=>{ const p=plant(r.t,r.f,h,L,sea,0), T=r.t+K*L/Math.max(0.2,r.f*h);
+    let v,c; if (r.base){ v='Safe, wasteful'; c='base'; } else if (T<=LIMIT-MARGIN){ v='Safe'; c='ok'; } else if (T<=LIMIT){ v='Too close'; c='warn'; } else { v='Overheats'; c='bad'; }
+    if (r.pick && A.mode[i]==='warning'){ v='Safe mode'; c='warn'; }
+    return `<div class="opt ${r.pick?'pick':''}"><span class="nm">${r.n}</span><span class="c"><small>Setting</small>${v1(r.t)}° · ${Math.round(r.f*100)}%</span><span class="c"><small>Rack</small>${v1(T)} °C</span><span class="c"><small>Cooling</small>${fmt(p.total)} kW</span><span class="verdict ${c}">${v}</span></div>`; }).join('')+'</div>';
+}
+function renderPanel(){
+  el('panel').innerHTML = panelHTML();
+  if (step===3){
+    el('trySet').addEventListener('input', e=>{ trySet=+e.target.value; refreshCand(); });
+    el('tryPump').addEventListener('input', e=>{ tryPump=+e.target.value; refreshCand(); });
+  }
+}
+function refreshCand(){ const c=el('panel').querySelector('.cand'); if(c) c.outerHTML=candHTML(); el('trySetV').textContent=v1(trySet)+' °C'; el('tryPumpV').textContent=Math.round(tryPump*100)+'%'; }
+function setStep(n, fromTour){
+  step=n; if(!fromTour) stopTour();
+  document.querySelectorAll('.steps button[data-step]').forEach(b=>{ if(+b.dataset.step===n) b.setAttribute('aria-current','step'); else b.removeAttribute('aria-current'); });
+  setView(n===2||n===3 ? 'twin' : 'real');
+  renderPanel();
+}
+function setView(v){ view=v; el('vReal').setAttribute('aria-pressed', String(v==='real')); el('vTwin').setAttribute('aria-pressed', String(v==='twin')); if(reduce) drawTwin(); }
+
+/* ---------- twin canvas ---------- */
+const tc=el('twin'), tx=tc.getContext('2d'); let anim=0, M=false;
+function rr(x,y,w,h,r){ tx.beginPath(); if (tx.roundRect) tx.roundRect(x,y,w,h,r); else tx.rect(x,y,w,h); }
+function box(x,y,w,h,o){ rr(x,y,w,h,o.r||3); if(o.fill){ tx.fillStyle=o.fill; tx.fill(); } if(o.stroke){ tx.strokeStyle=o.stroke; tx.lineWidth=o.lw||1.4; tx.setLineDash(o.dash||[]); tx.stroke(); tx.setLineDash([]); } }
+// o.minor: hidden on phones; o.short: shorter text on phones. Phones also get bigger type.
+function label(t,x,y,o={}){
+  if (M && o.minor) return;
+  if (M && o.short) t=o.short;
+  const s=(o.s||13)*(M?1.7:1);
+  tx.font=`${o.w||600} ${s}px ${o.f==='d'?'"Big Shoulders Display", sans-serif':'"IBM Plex Mono", monospace'}`;
+  tx.fillStyle=o.c||C['ink-soft']; tx.textAlign=o.a||'left'; tx.textBaseline=o.b||'alphabetic'; tx.fillText(t,x,y);
+}
+function pipe(pts,color,speed,w){
+  tx.lineCap='round'; tx.lineJoin='round';
+  tx.beginPath(); pts.forEach((p,k)=>k?tx.lineTo(p[0],p[1]):tx.moveTo(p[0],p[1]));
+  tx.strokeStyle=color; tx.globalAlpha=.28; tx.lineWidth=w; tx.stroke(); tx.globalAlpha=1;
+  tx.setLineDash([10,12]); tx.lineDashOffset=-anim*speed*40; tx.lineWidth=w*.5; tx.stroke(); tx.setLineDash([]); tx.lineDashOffset=0;
+}
+function ring(x,y,w,h){ const a=.55+.45*Math.sin(anim*4); tx.strokeStyle=C.amber; tx.globalAlpha=a; tx.lineWidth=2.5; tx.setLineDash([6,5]); rr(x-6,y-6,w+12,h+12,8); tx.stroke(); tx.setLineDash([]); tx.globalAlpha=1; }
+function drawTwin(){
+  if(!S) return;
+  const dpr=window.devicePixelRatio||1, w=tc.clientWidth, h=tc.clientHeight; if(!w) return;
+  if (tc.width!==Math.round(w*dpr) || tc.height!==Math.round(h*dpr)){ tc.width=Math.round(w*dpr); tc.height=Math.round(h*dpr); }
+  M = w < 640;
+  // On phones, crop the shore so the floating module fills the screen.
+  const VX=M?140:0, VW=M?870:1000, s=w/VW;
+  tx.setTransform(dpr*s,0,0,dpr*s,-VX*dpr*s,0);
+  const twin=view==='twin', i=cur, L=S.load[i], th=twin?A.Thm[i]:A.Th[i], F=A.F[i], hl=S.health[i];
+  const ink=twin?C.teal:C.ink, soft=twin?C.teal:C['ink-soft'];
+  tx.fillStyle=twin?C['twin-bg']:C.surface; tx.fillRect(VX,0,VW,500);
+  if (twin){ tx.strokeStyle=C.teal; tx.globalAlpha=.12; tx.lineWidth=1; for(let x=0;x<=1000;x+=25){tx.beginPath();tx.moveTo(x,0);tx.lineTo(x,500);tx.stroke();} for(let y=0;y<=500;y+=25){tx.beginPath();tx.moveTo(VX,y);tx.lineTo(1000,y);tx.stroke();} tx.globalAlpha=1; }
+  // sea
+  tx.beginPath(); tx.moveTo(0,500);
+  for (let x=0;x<=1000;x+=10) tx.lineTo(x, 268+Math.sin(x/60+anim*1.2)*3+Math.sin(x/23+anim*2)*1.2);
+  tx.lineTo(1000,500); tx.closePath();
+  if (twin){ tx.strokeStyle=C.teal; tx.lineWidth=1.2; tx.stroke(); } else { tx.fillStyle=C['sea-fill']; tx.fill(); }
+  label(twin?'DIGITAL TWIN · VIRTUAL COPY':'PHYSICAL PLANT', VX+22, 36, {s:20, f:'d', w:800, c: twin?C.teal:C.ink, short: twin?'DIGITAL TWIN':'REAL PLANT'});
+  label(twin?'Updated from sensors every few seconds':'Floating module, 1 MW of servers', VX+22, 56, {s:12, c:soft, minor:true});
+  label(`Seawater ${S.sea[i].toFixed(1)} °C`, 975, 302, {a:'right', s:12, c:soft, short:`Sea ${S.sea[i].toFixed(1)}°`});
+  // shore (hidden on phones by the crop)
+  if(!twin) box(0,252,130,248,{fill:C.land,r:0}); else { tx.strokeStyle=C.teal; tx.lineWidth=1.2; tx.beginPath(); tx.moveTo(0,252); tx.lineTo(130,252); tx.lineTo(130,500); tx.stroke(); }
+  box(18,176,96,76,{fill:twin?null:C.surface, stroke:ink});
+  label('SHORE', 28, 200, {s:15, f:'d', w:800, c:ink}); label('CONTROL', 28, 216, {s:15, f:'d', w:800, c:ink}); label('remote ops', 28, 238, {s:11, c:soft});
+  for (let k=0;k<3;k++){ const ph=((anim*0.8+k/3)%1); tx.strokeStyle=C.teal; tx.globalAlpha=1-ph; tx.lineWidth=1.5; tx.beginPath(); tx.arc(330,84,10+ph*36,Math.PI*1.05,Math.PI*1.6); tx.stroke(); } tx.globalAlpha=1;
+  tx.strokeStyle=C.teal; tx.setLineDash([3,6]); tx.beginPath(); tx.moveTo(114,190); tx.quadraticCurveTo(200,70,322,84); tx.stroke(); tx.setLineDash([]);
+  tx.strokeStyle=ink; tx.lineWidth=1.5; tx.beginPath(); tx.moveTo(330,104); tx.lineTo(330,84); tx.stroke();
+  if (M) label('to shore control', 352, 80, {s:9, c:C.teal});
+  // hull
+  box(150,246,690,56,{fill:twin?null:C.hull, stroke:ink, r:6});
+  label('PONTOON HULL', 495, 280, {a:'center', s:12, c:soft, minor:true});
+  tx.strokeStyle=soft; tx.setLineDash([2,5]); tx.lineWidth=1.2; tx.beginPath(); tx.moveTo(170,302); tx.lineTo(150,490); tx.moveTo(820,302); tx.lineTo(850,490); tx.stroke(); tx.setLineDash([]);
+  // server hall
+  box(176,104,320,142,{fill:twin?null:C.surface, stroke:ink});
+  label('SERVER HALL', 190, 128, {s:17, f:'d', w:800, c:ink, short:'SERVERS'});
+  for (let k=0;k<8;k++){
+    const x=192+k*37, T=th-1.6+k*0.42+(k===6?0.4:0), f=Math.min(1,Math.max(0,(T-20)/14));
+    box(x,140,28,86,{fill: twin?null:heat(T), stroke: twin?heat(T):null, lw:2, r:2});
+    if (twin){ tx.fillStyle=heat(T); tx.globalAlpha=.25; tx.fillRect(x,226-86*f,28,86*f); tx.globalAlpha=1; if(!M||k%2===1) label(T.toFixed(0)+'°', x+14, 136, {a:'center', s:11, c:heat(T)}); }
+    if (!twin) for (let j=0;j<5;j++){ tx.fillStyle='rgba(255,255,255,.18)'; tx.fillRect(x+4,148+j*15,20,3); }
+    const pulse = step===1 ? 3.2+1.6*Math.sin(anim*5+k) : 2.8;
+    tx.fillStyle=C.amber; tx.beginPath(); tx.arc(x+14,152,pulse*(M?1.3:1),0,7); tx.fill();
+  }
+  if (Math.abs(A.sA[i]-A.sB[i])>2) label('SENSOR FAULT', 486, 128, {a:'right', s:11, w:600, c:C.red, short:'FAULT'});
+  // coolant loop
+  const flow=Math.max(0.1,F*hl);
+  pipe([[496,150],[540,150]], C.amber, flow, 8);
+  pipe([[540,206],[496,206]], C.teal, flow, 8);
+  // plant
+  box(540,122,160,124,{fill:twin?null:C.surface, stroke:ink});
+  label('COOLING PLANT', 552, 146, {s:16, f:'d', w:800, c:ink, short:'COOLING'});
+  const pumpWarn=A.alerts.some(a=>a.type==='pump'&&a.i<=i);
+  const px=580, py=200; tx.strokeStyle=pumpWarn?C.amber:ink; tx.lineWidth=2; tx.beginPath(); tx.arc(px,py,18,0,7); tx.stroke();
+  const ang=anim*flow*8; for(let k=0;k<3;k++){ const a=ang+k*2.094; tx.beginPath(); tx.moveTo(px,py); tx.lineTo(px+Math.cos(a)*14, py+Math.sin(a)*14); tx.stroke(); }
+  label(pumpWarn?'PUMP P2 !':'PUMP', px, 236, {a:'center', s:11, c:pumpWarn?C.amber:soft, w:600, short: pumpWarn?'P2 !':'PUMP'});
+  box(620,170,66,52,{fill:null, stroke:ink});
+  label('CHILLER', 653, 188, {a:'center', s:11, c:soft, minor:true});
+  label(A.Ts[i].toFixed(1)+(M?'°':'°C'), 653, M?206:208, {a:'center', s:14, c:ink, w:600});
+  // heat store
+  const recNow=A.rec[i], cum=sum(A.rec.slice(0,i+1)), tot=Math.max(1,sum(A.rec));
+  if (recNow>0) pipe([[700,196],[728,196]], C.amber, 0.8, 7);
+  box(728,150,80,96,{fill:twin?null:C.surface, stroke:C.amber, r:10});
+  const lvl=Math.min(1,cum/tot); tx.save(); rr(730,152,76,92,9); tx.clip(); tx.fillStyle=C.amber; tx.globalAlpha=.28; tx.fillRect(730,244-92*lvl,76,92*lvl); tx.restore(); tx.globalAlpha=1;
+  label('HEAT', 768, 176, {a:'center', s:14, f:'d', w:800, c:ink}); label('STORE', 768, 194, {a:'center', s:14, f:'d', w:800, c:ink, minor:true});
+  label(Math.round(recNow)+' kW', 768, 232, {a:'center', s:12, c:C.amber, w:600});
+  label('→ service water', 768, 140, {a:'center', s:11, c:soft, minor:true});
+  // intake
+  pipe([[600,480],[600,246]], C.teal, flow, 9);
+  box(586,476,28,10,{fill:C.teal, r:2});
+  label('DEEP INTAKE', 614, 452, {s:12, c:C.teal, w:600, short:'INTAKE'}); label('colder water from below', 614, 468, {s:11, c:soft, minor:true});
+  // discharge + plume
+  const rej = 1000*L - recNow + A.P[i];
+  pipe([[670,246],[670,340],[880,340],[880,392]], C.amber, flow, 9);
+  const pr = 30 + rej/1000*55;
+  for (let k=0;k<3;k++){ tx.fillStyle=C.amber; tx.globalAlpha=.08+k*.05; tx.beginPath(); tx.ellipse(880,410,pr*(1-k*.28)*(1+.04*Math.sin(anim*2+k)),pr*.32*(1-k*.25),0,0,7); tx.fill(); } tx.globalAlpha=1;
+  label('DIFFUSER', 880, M?474:458, {s:12, c:C.amber, w:600, a:'center', short:'OUTLET'}); label('spreads warm water', 880, 474, {a:'center', s:11, c:soft, minor:true});
+  if (twin) label(`heat to sea: ${Math.round(rej)} kW`, 880, 492, {a:'center', s:11, c:C.teal, minor:true});
+  // cameras
+  [[250,302],[470,302]].forEach(([x,y],k)=>{ tx.fillStyle=ink; tx.fillRect(x,y,16,10); const sw=Math.sin(anim*1.5+k)*0.5; tx.fillStyle=C.teal; tx.globalAlpha=.12; tx.beginPath(); tx.moveTo(x+8,y+10); tx.lineTo(x+8+Math.sin(sw-0.4)*90, y+10+Math.cos(sw-0.4)*90); tx.lineTo(x+8+Math.sin(sw+0.4)*90, y+10+Math.cos(sw+0.4)*90); tx.closePath(); tx.fill(); tx.globalAlpha=1; });
+  label('AI CAMERAS: corrosion · marine growth · leaks', 180, 338, {s:11, c:soft, short:'AI CAMERAS'});
+  // step highlights
+  if (step===1) ring(184,138,300,92);
+  if (step===2){ label('⇆ synced with real plant', 520, 80, {s:12, c:C.teal, w:600, short:'⇆ synced'}); ring(176,104,632,142); }
+  if (step===3){ ring(540,122,160,124); label(`testing ${A.tested[i]} options…`, 620, 112, {a:'center', s:12, c:C.amber, w:600, short:`testing ${A.tested[i]}…`}); }
+  if (step===4){ tx.strokeStyle=C.red; tx.setLineDash([6,4]); tx.lineWidth=1.5; const yl=226-86*((LIMIT-20)/14); tx.beginPath(); tx.moveTo(186,yl); tx.lineTo(490,yl); tx.stroke(); tx.setLineDash([]); label('32 °C limit', 490, yl-5, {a:'right', s:11, c:C.red, w:600}); ring(184,138,300,92); }
+  if (step===5){ ring(540,122,160,124); label(`sent: ${A.Ts[i].toFixed(1)} °C · pumps ${Math.round(F*100)}%`, 620, 112, {a:'center', s:12, c:C.teal, w:600, short:`${A.Ts[i].toFixed(1)}° · ${Math.round(F*100)}%`}); }
+}
+
+/* ---------- charts ---------- */
+function drawChart(cv, series, cfg){
+  const dpr=window.devicePixelRatio||1, w=cv.clientWidth, h=cv.clientHeight; if(!w) return;
+  cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr);
+  const c=cv.getContext('2d'); c.setTransform(dpr,0,0,dpr,0,0);
+  const narrow=w<500, pl=narrow?32:38,pr=8,pt=10,pb=22,W=w-pl-pr,H=h-pt-pb, Xp=i=>pl+i/(N-1)*W, Yp=v=>pt+(1-(Math.min(cfg.max,Math.max(cfg.min,v))-cfg.min)/(cfg.max-cfg.min))*H;
+  c.font='11px "IBM Plex Mono", monospace'; c.fillStyle=C['ink-soft']; c.textBaseline='middle';
+  for (let v=cfg.min; v<=cfg.max+1e-9; v+=cfg.step){ c.strokeStyle=C.line; c.lineWidth=1; c.beginPath(); c.moveTo(pl,Math.round(Yp(v))+.5); c.lineTo(w-pr,Math.round(Yp(v))+.5); c.stroke(); c.textAlign='right'; c.fillText(String(v),pl-5,Yp(v)); }
+  c.textAlign='center'; c.textBaseline='top';
+  for (let hr=0; hr<=24; hr+=(narrow?6:4)){ const ii=Math.min(N-1,hr*12); c.fillText(String(hr).padStart(2,'0')+(narrow?'h':':00'), Math.min(Math.max(Xp(ii),pl+14),w-pr-14), h-pb+6); }
+  if (cfg.limit!=null){ c.strokeStyle=C.amber; c.setLineDash([6,4]); c.lineWidth=1.5; c.beginPath(); c.moveTo(pl,Yp(cfg.limit)); c.lineTo(w-pr,Yp(cfg.limit)); c.stroke(); c.setLineDash([]); }
+  series.forEach(sr=>{
+    if (sr.fill){ c.beginPath(); c.moveTo(Xp(0),Yp(cfg.min)); sr.d.forEach((v,i)=>c.lineTo(Xp(i),Yp(v))); c.lineTo(Xp(N-1),Yp(cfg.min)); c.closePath(); c.fillStyle=sr.c; c.globalAlpha=.1; c.fill(); c.globalAlpha=1; }
+    c.beginPath(); sr.d.forEach((v,i)=>i?c.lineTo(Xp(i),Yp(v)):c.moveTo(Xp(i),Yp(v))); c.strokeStyle=sr.c; c.lineWidth=sr.wd||2; c.setLineDash(sr.dash||[]); c.stroke(); c.setLineDash([]);
+  });
+  (cfg.marks||[]).forEach(m=>{ const x=Xp(m.i); c.fillStyle=m.c; c.beginPath(); c.moveTo(x,pt+1); c.lineTo(x-5,pt+10); c.lineTo(x+5,pt+10); c.closePath(); c.fill(); });
+  const x=Xp(cur); c.strokeStyle=C.ink; c.globalAlpha=.45; c.lineWidth=1; c.beginPath(); c.moveTo(x,pt); c.lineTo(x,pt+H); c.stroke(); c.globalAlpha=1;
+  series.forEach(sr=>{ c.fillStyle=sr.c; c.beginPath(); c.arc(x,Yp(sr.d[cur]),3.5,0,7); c.fill(); });
+  cv._geo={pl,W};
+}
+function drawCharts(){
+  const marks=A.alerts.map(a=>({i:a.i,c:a.type==='sensor'?C.red:C.amber}));
+  const ts=[{d:B.Th,c:C.base,wd:1.75},{d:A.Th,c:C.teal,wd:2.25}]; if(X) ts.push({d:X.Th,c:C.red,wd:1.75,dash:[5,4]});
+  drawChart(el('chT'), ts, {min:18,max:38,step:4,limit:LIMIT,marks});
+  drawChart(el('chP'), [{d:B.P,c:C.base,wd:1.75},{d:A.P,c:C.teal,wd:2.25,fill:true}], {min:0,max:400,step:100});
+}
+['chT','chP'].forEach(id=>el(id).addEventListener('click', e=>{ const g=e.currentTarget._geo; if(!g) return; const r=e.currentTarget.getBoundingClientRect(); setTime(Math.round(Math.min(1,Math.max(0,(e.clientX-r.left-g.pl)/g.W))*(N-1))); el('twin-sec').scrollIntoView({behavior: reduce?'auto':'smooth'}); }));
+
+function setHud(){ el('clock').textContent=hh(cur); const md=A.mode[cur], m=el('mode'); m.textContent= md==='warning'?'SAFE MODE':md==='caution'?'CAUTION':'NORMAL'; m.className='mode'+(md==='normal'?'':' '+md); }
+function updateAll(){ setHud(); renderPanel(); drawCharts(); drawTwin(); }
+function setTime(v){ cur=v; el('t').value=v; updateAll(); }
+
+/* ---------- interactions ---------- */
+el('t').addEventListener('input', e=>setTime(+e.target.value));
+['optSpike','optPump','optSensor'].forEach(id=>el(id).addEventListener('change', simulate));
+el('vReal').addEventListener('click', ()=>{ stopTour(); setView('real'); });
+el('vTwin').addEventListener('click', ()=>{ stopTour(); setView('twin'); });
+document.querySelectorAll('.steps button[data-step]').forEach(b=>b.addEventListener('click', ()=>setStep(+b.dataset.step)));
+let timer=null;
+function stopPlay(){ if(timer){ clearInterval(timer); timer=null; el('play').textContent='▶ Play day'; } }
+el('play').addEventListener('click', ()=>{
+  if (timer){ stopPlay(); return; }
+  if (cur>=N-1) cur=0;
+  el('play').textContent='❚❚ Pause';
+  timer=setInterval(()=>{ if(cur>=N-1){ stopPlay(); return; } cur++; el('t').value=cur; setHud();
+    if (cur%3===0){ renderPanel(); drawCharts(); } if(reduce) drawTwin(); }, reduce?150:70);
+});
+let tourT=null;
+function stopTour(){ if(tourT){ clearInterval(tourT); tourT=null; el('tour').textContent='▶ Auto tour'; } }
+el('tour').addEventListener('click', ()=>{
+  if (tourT){ stopTour(); return; }
+  el('tour').textContent='❚❚ Stop tour'; setStep(1,true);
+  tourT=setInterval(()=>setStep(step%5+1,true), 5000);
+});
+function impact(){
+  const p=+el('pct').value/100, gwh=60000*0.07*0.40*p, flats=gwh*1e6/(FLAT_MONTH*12), co2=gwh*1e6*EF/1000;
+  el('pctOut').textContent=Math.round(p*100)+'%';
+  el('iGwh').textContent=fmt(gwh);
+  el('iFlats').textContent=r100(flats);
+  el('iCo2').textContent=r100(co2);
+  const k=25*8760/1000*0.40*p;
+  el('kGwh').textContent='~'+k.toFixed(0)+' GWh';
+  el('kTxt').innerHTML=`<b>Keppel's 25 MW floating data centre alone:</b> at full load with 40% of its electricity going to cooling, saving ${Math.round(p*100)}% of that cooling would cut about ${k.toFixed(0)} GWh a year. That's about ${r100(k*1e6/(FLAT_MONTH*12))} four-room flats' electricity for a year.`;
+}
+el('pct').addEventListener('input', impact);
+
+/* ---------- loop + theme ---------- */
+function frame(){ anim+=0.016; wt+=0.016; drawWaves(); drawTwin(); if(!reduce) requestAnimationFrame(frame); }
+let rz; window.addEventListener('resize', ()=>{ clearTimeout(rz); rz=setTimeout(()=>{ drawCharts(); drawTwin(); drawWaves(); },120); });
+const rethem=()=>{ readColors(); if(S){ drawCharts(); drawTwin(); } drawWaves(); };
+if (window.matchMedia) matchMedia('(prefers-color-scheme: dark)').addEventListener('change', rethem);
+new MutationObserver(rethem).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+simulate(); impact(); setStep(1); frame();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(()=>{ drawCharts(); drawTwin(); });
+})();
+</script>
+
+</body>
+</html>
