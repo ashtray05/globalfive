@@ -1,4 +1,4 @@
-# AEGIS-AQUA website (GlobalFive)
+# AEGIS website (GlobalFive)
 
 A single static page. No build step, no server code. Open `index.html` in a browser to preview it.
 
